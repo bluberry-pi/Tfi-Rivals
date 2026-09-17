@@ -37,10 +37,11 @@ public class PlayerControls : MonoBehaviour
 
     private Rigidbody2D rb;
 
-    bool jumpPressed;
-    bool jumpHeld;
-    float jumpTime;
-    bool isGrounded;
+    [Header("Debug Info")]
+    [SerializeField] private bool isGrounded;
+    [SerializeField] private bool jumpPressed;
+    [SerializeField] private bool jumpHeld;
+    private float jumpTime;
 
     float tiltTimer;
     bool tiltRight;
@@ -221,15 +222,24 @@ public class PlayerControls : MonoBehaviour
 
     public void Jump(InputAction.CallbackContext context)
     {
-        if (context.started && isGrounded)
+        if (context.started)
         {
-            jumpPressed = true;
-            jumpHeld = true;
+            if (isGrounded)
+            {
+                jumpPressed = true;
+                jumpHeld = true;
+                Debug.Log("<color=cyan>[Jump] Button pressed: CAN JUMP (Character is grounded: true)</color>");
+            }
+            else
+            {
+                Debug.LogWarning("<color=orange>[Jump] Button pressed: CANNOT JUMP (Character is in air / grounded: false)</color>");
+            }
         }
 
         if (context.canceled)
         {
             jumpHeld = false;
+            Debug.Log("[Jump] Button released (jumpHeld: false)");
         }
     }
 
@@ -261,6 +271,8 @@ public class PlayerControls : MonoBehaviour
         );
 
         isGrounded = false;
+        groundTriggerCount = 0;
+        Debug.Log($"<color=cyan>[Jump] Executed Jump! Velocity: {rb.linearVelocity}, Force: {jumpForce}, isGrounded set to false (in air)</color>");
     }
 
     // VARIABLE JUMP
@@ -281,7 +293,11 @@ public class PlayerControls : MonoBehaviour
 
     public void BetterGravity()
     {
-        if (rb.linearVelocity.y > 0)
+        if (isGrounded)
+        {
+            rb.gravityScale = 1f;
+        }
+        else if (rb.linearVelocity.y > 0)
         {
             rb.gravityScale = jumpGravity;
         }
@@ -291,22 +307,47 @@ public class PlayerControls : MonoBehaviour
         }
     }
 
-    // GROUND CHECK
+    // GROUND CHECK (TRIGGER)
 
-    void OnCollisionEnter2D(Collision2D collision)
+    private int groundTriggerCount = 0;
+
+    void OnTriggerEnter2D(Collider2D other)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (other.CompareTag("Ground"))
         {
+            groundTriggerCount++;
             isGrounded = true;
             rb.gravityScale = 1f;
+            Debug.Log($"<color=green>[GroundCheck] Trigger entered '{other.name}' (Tag: Ground) -> GROUNDED: TRUE (Can jump)</color>");
+        }
+        else
+        {
+            Debug.Log($"[GroundCheck] Trigger touched '{other.name}' (Tag: '{other.tag}')");
         }
     }
 
-    void OnCollisionExit2D(Collision2D collision)
+    void OnTriggerStay2D(Collider2D other)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+        if (other.CompareTag("Ground") && rb.linearVelocity.y <= 0.1f)
         {
-            isGrounded = false;
+            isGrounded = true;
+        }
+    }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Ground"))
+        {
+            groundTriggerCount = Mathf.Max(0, groundTriggerCount - 1);
+            if (groundTriggerCount == 0)
+            {
+                isGrounded = false;
+                Debug.Log($"<color=yellow>[GroundCheck] Trigger left '{other.name}' (Tag: Ground) -> IN AIR / GROUNDED: FALSE (Cannot jump)</color>");
+            }
+            else
+            {
+                Debug.Log($"[GroundCheck] Trigger left one ground surface, but still overlapping another -> GROUNDED remains TRUE");
+            }
         }
     }
 }
