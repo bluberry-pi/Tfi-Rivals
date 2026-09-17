@@ -20,20 +20,17 @@ public class PlayerMovement : MonoBehaviour
 
     bool jumpPressed;
     bool jumpHeld;
-
     float jumpTime;
-
     bool isGrounded;
 
     // --------------------------------------------------
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        transform.localScale = new Vector3(1, 1, 1);
     }
 
     // --------------------------------------------------
-
     void FixedUpdate()
     {
         Movement();
@@ -41,7 +38,6 @@ public class PlayerMovement : MonoBehaviour
         if (jumpPressed)
         {
             Jump();
-
             jumpPressed = false;
             jumpTime = 0;
         }
@@ -57,6 +53,17 @@ public class PlayerMovement : MonoBehaviour
     public void Move(InputAction.CallbackContext context)
     {
         horizontal = context.ReadValue<Vector2>().x;
+
+        if (horizontal > 0)
+        {
+            // Face right
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else if (horizontal < 0)
+        {
+            // Face left
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
     }
 
     public void Movement()
@@ -110,7 +117,6 @@ public class PlayerMovement : MonoBehaviour
             jumpTime < maxJumpTime)
         {
             rb.AddForce(Vector2.up * jumpHoldForce);
-
             jumpTime += Time.fixedDeltaTime;
         }
     }
@@ -126,7 +132,6 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.gravityScale = jumpGravity;
         }
-
         // Going DOWN
         else
         {
