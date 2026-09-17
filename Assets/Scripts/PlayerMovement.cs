@@ -14,8 +14,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpGravity = 4f;
     public float fallGravity = 5f;
 
-    float horizontal;
-
+    public float horizontal;
     private Rigidbody2D rb;
 
     bool jumpPressed;
