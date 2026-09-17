@@ -153,9 +153,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   speed: 5
-  jumpForce: 5
-  jumpHoldForce: 10
+  jumpForce: 13
+  jumpHoldForce: 20
   maxJumpTime: 0.2
+  jumpGravity: 4
+  fallGravity: 5
 --- !u!212 &215218719
 SpriteRenderer:
   serializedVersion: 2

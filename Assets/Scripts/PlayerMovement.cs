@@ -4,21 +4,36 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     public float speed = 5f;
-    public float jumpForce = 5f;
+
+    [Header("Jump")]
+    public float jumpForce = 10f;
     public float jumpHoldForce = 10f;
-    public float maxJumpTime = 0.2f;
+    public float maxJumpTime = 0.1f;
+
+    [Header("Jump Gravity")]
+    public float jumpGravity = 4f;
+    public float fallGravity = 5f;
+
     float horizontal;
+
     private Rigidbody2D rb;
+
     bool jumpPressed;
     bool jumpHeld;
+
     float jumpTime;
+
     bool isGrounded;
-    //-------------------------------------------------------------------------------------------------
+
+    // --------------------------------------------------
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
     }
-    //-------------------------------------------------------------------------------------------------
+
+    // --------------------------------------------------
+
     void FixedUpdate()
     {
         Movement();
@@ -26,16 +41,35 @@ public class PlayerMovement : MonoBehaviour
         if (jumpPressed)
         {
             Jump();
+
             jumpPressed = false;
             jumpTime = 0;
         }
-        variableJump();
+
+        VariableJump();
+        BetterGravity();
     }
-    //-------------------------------------------------------------------------------------------------
+
+    // --------------------------------------------------
+    // MOVEMENT
+    // --------------------------------------------------
+
     public void Move(InputAction.CallbackContext context)
     {
         horizontal = context.ReadValue<Vector2>().x;
     }
+
+    public void Movement()
+    {
+        rb.linearVelocity = new Vector2(
+            horizontal * speed,
+            rb.linearVelocity.y
+        );
+    }
+
+    // --------------------------------------------------
+    // JUMP INPUT
+    // --------------------------------------------------
 
     public void Jump(InputAction.CallbackContext context)
     {
@@ -51,31 +85,65 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void Movement()
-    {
-        rb.linearVelocity = new Vector2(horizontal * speed, rb.linearVelocity.y);
-    }
+    // --------------------------------------------------
+    // JUMP
+    // --------------------------------------------------
 
     public void Jump()
     {
-        rb.linearVelocity = new Vector2(horizontal * speed, jumpForce);
+        rb.linearVelocity = new Vector2(
+            horizontal * speed,
+            jumpForce
+        );
+
         isGrounded = false;
     }
 
-    public void variableJump()
+    // --------------------------------------------------
+    // VARIABLE JUMP
+    // --------------------------------------------------
+
+    public void VariableJump()
     {
-        if (jumpHeld && rb.linearVelocity.y > 0 && jumpTime < maxJumpTime)
+        if (jumpHeld &&
+            rb.linearVelocity.y > 0 &&
+            jumpTime < maxJumpTime)
         {
             rb.AddForce(Vector2.up * jumpHoldForce);
-            jumpTime = jumpTime + Time.fixedDeltaTime;
+
+            jumpTime += Time.fixedDeltaTime;
         }
     }
+
+    // --------------------------------------------------
+    // BETTER GRAVITY
+    // --------------------------------------------------
+
+    public void BetterGravity()
+    {
+        // Going UP
+        if (rb.linearVelocity.y > 0)
+        {
+            rb.gravityScale = jumpGravity;
+        }
+
+        // Going DOWN
+        else
+        {
+            rb.gravityScale = fallGravity;
+        }
+    }
+
+    // --------------------------------------------------
+    // GROUND CHECK
+    // --------------------------------------------------
 
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+            rb.gravityScale = 1f;
         }
     }
 
