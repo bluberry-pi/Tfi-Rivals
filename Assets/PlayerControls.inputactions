@@ -35,6 +35,16 @@
                     "interactions": "",
                     "initialStateCheck": false,
                     "priority": 0
+                },
+                {
+                    "name": "Kick",
+                    "type": "Button",
+                    "id": "517e75f0-44f3-4b08-8616-47fe89659001",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
                 }
             ],
             "bindings": [
@@ -139,12 +149,34 @@
                 },
                 {
                     "name": "",
-                    "id": "93ebcfb2-00dd-4eb9-bdd0-21fd3114b772",
-                    "path": "<Gamepad>/buttonEast",
+                    "id": "15d12270-b828-4b6f-876f-f9417dea0983",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Punch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6954b73e-78e2-4779-ab12-5701476758c6",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Kick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9b277072-1a22-4d19-abb7-2646d1c62f9d",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Kick",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -163,6 +195,11 @@
                 },
                 {
                     "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Mouse>",
                     "isOptional": false,
                     "isOR": false
                 }
