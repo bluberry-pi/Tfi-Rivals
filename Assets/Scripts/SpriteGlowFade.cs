@@ -167,6 +167,10 @@ public class SpriteGlowFade : MonoBehaviour
     // Call this right after the real sprite's GameObject becomes active.
     public void Play()
     {
+        // Respect the Inspector checkbox - PlayerTransition calls this
+        // directly, which otherwise ignores enabled/disabled state.
+        if (!enabled) return;
+
         RefreshSprite();
 
         if (fadeRoutine != null)
