@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerControls : MonoBehaviour
 {
     public float speed = 5f;
 
@@ -17,6 +17,11 @@ public class PlayerMovement : MonoBehaviour
     [Header("Running Tilt")]
     public bool enableRunningTilt = true;
     public bool smoothTilt = true;
+    [Header("Punch")]
+    public bool isPunchPressed = false;
+    public float punchTime = 0.2f;
+
+    private float punchTimer;
 
     public float runTiltAmount = 6f;
     public float runTiltSpeed = 7f;
@@ -31,13 +36,10 @@ public class PlayerMovement : MonoBehaviour
     float jumpTime;
     bool isGrounded;
 
-    // Running tilt variables
     float tiltTimer;
     bool tiltRight;
 
-    // --------------------------------------------------
     // START
-    // --------------------------------------------------
 
     void Start()
     {
@@ -47,18 +49,19 @@ public class PlayerMovement : MonoBehaviour
         transform.localRotation = Quaternion.identity;
     }
 
-    // --------------------------------------------------
     // UPDATE
-    // --------------------------------------------------
 
     void Update()
     {
         RunningJuice();
+
+        if (isPunchPressed)
+        {
+            Punch();
+        }
     }
 
-    // --------------------------------------------------
     // FIXED UPDATE
-    // --------------------------------------------------
 
     void FixedUpdate()
     {
@@ -76,9 +79,7 @@ public class PlayerMovement : MonoBehaviour
         BetterGravity();
     }
 
-    // --------------------------------------------------
     // MOVEMENT
-    // --------------------------------------------------
 
     public void Move(InputAction.CallbackContext context)
     {
@@ -104,9 +105,17 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
-    // --------------------------------------------------
+    public void Punch()
+    {
+        punchTimer -= Time.deltaTime;
+
+        if (punchTimer <= 0f)
+        {
+            isPunchPressed = false;
+        }
+    }
+
     // RUNNING TILT
-    // --------------------------------------------------
 
     void RunningJuice()
     {
@@ -122,9 +131,7 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        // --------------------------------------------------
         // NOT MOVING
-        // --------------------------------------------------
 
         if (Mathf.Abs(horizontal) < 0.01f)
         {
@@ -147,9 +154,7 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        // --------------------------------------------------
         // RUNNING
-        // --------------------------------------------------
 
         tiltTimer += Time.deltaTime;
 
@@ -175,9 +180,7 @@ public class PlayerMovement : MonoBehaviour
             tilt
         );
 
-        // --------------------------------------------------
         // SMOOTH / INSTANT
-        // --------------------------------------------------
 
         if (smoothTilt)
         {
@@ -194,9 +197,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // --------------------------------------------------
     // JUMP INPUT
-    // --------------------------------------------------
 
     public void Jump(InputAction.CallbackContext context)
     {
@@ -212,9 +213,16 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // --------------------------------------------------
+    public void Punch(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            isPunchPressed = true;
+            punchTimer = punchTime;
+        }
+    }
+
     // JUMP
-    // --------------------------------------------------
 
     public void Jump()
     {
@@ -226,9 +234,7 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = false;
     }
 
-    // --------------------------------------------------
     // VARIABLE JUMP
-    // --------------------------------------------------
 
     public void VariableJump()
     {
@@ -242,9 +248,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // --------------------------------------------------
     // BETTER GRAVITY
-    // --------------------------------------------------
 
     public void BetterGravity()
     {
@@ -258,9 +262,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // --------------------------------------------------
     // GROUND CHECK
-    // --------------------------------------------------
 
     void OnCollisionEnter2D(Collision2D collision)
     {
