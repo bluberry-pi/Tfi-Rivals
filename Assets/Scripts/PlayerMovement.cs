@@ -14,7 +14,16 @@ public class PlayerMovement : MonoBehaviour
     public float jumpGravity = 4f;
     public float fallGravity = 5f;
 
+    [Header("Running Tilt")]
+    public bool enableRunningTilt = true;
+    public bool smoothTilt = true;
+
+    public float runTiltAmount = 6f;
+    public float runTiltSpeed = 7f;
+    public float tiltSmoothSpeed = 12f;
+
     public float horizontal;
+
     private Rigidbody2D rb;
 
     bool jumpPressed;
@@ -22,14 +31,35 @@ public class PlayerMovement : MonoBehaviour
     float jumpTime;
     bool isGrounded;
 
+    // Running tilt variables
+    float tiltTimer;
+    bool tiltRight;
+
     // --------------------------------------------------
+    // START
+    // --------------------------------------------------
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+
         transform.localScale = new Vector3(1, 1, 1);
+        transform.localRotation = Quaternion.identity;
     }
 
     // --------------------------------------------------
+    // UPDATE
+    // --------------------------------------------------
+
+    void Update()
+    {
+        RunningJuice();
+    }
+
+    // --------------------------------------------------
+    // FIXED UPDATE
+    // --------------------------------------------------
+
     void FixedUpdate()
     {
         Movement();
@@ -37,6 +67,7 @@ public class PlayerMovement : MonoBehaviour
         if (jumpPressed)
         {
             Jump();
+
             jumpPressed = false;
             jumpTime = 0;
         }
@@ -71,6 +102,96 @@ public class PlayerMovement : MonoBehaviour
             horizontal * speed,
             rb.linearVelocity.y
         );
+    }
+
+    // --------------------------------------------------
+    // RUNNING TILT
+    // --------------------------------------------------
+
+    void RunningJuice()
+    {
+        // MASTER TOGGLE
+        if (!enableRunningTilt)
+        {
+            tiltTimer = 0f;
+            tiltRight = false;
+
+            // Make absolutely sure the character is upright
+            transform.localRotation = Quaternion.identity;
+
+            return;
+        }
+
+        // --------------------------------------------------
+        // NOT MOVING
+        // --------------------------------------------------
+
+        if (Mathf.Abs(horizontal) < 0.01f)
+        {
+            tiltTimer = 0f;
+            tiltRight = false;
+
+            if (smoothTilt)
+            {
+                transform.localRotation = Quaternion.Lerp(
+                    transform.localRotation,
+                    Quaternion.identity,
+                    tiltSmoothSpeed * Time.deltaTime
+                );
+            }
+            else
+            {
+                transform.localRotation = Quaternion.identity;
+            }
+
+            return;
+        }
+
+        // --------------------------------------------------
+        // RUNNING
+        // --------------------------------------------------
+
+        tiltTimer += Time.deltaTime;
+
+        float switchTime = 1f / runTiltSpeed;
+
+        if (tiltTimer >= switchTime)
+        {
+            tiltTimer = 0f;
+            tiltRight = !tiltRight;
+        }
+
+        // Choose left or right tilt
+        float tilt = tiltRight
+            ? runTiltAmount
+            : -runTiltAmount;
+
+        // Reverse tilt when moving left
+        tilt *= Mathf.Sign(horizontal);
+
+        Quaternion targetRotation = Quaternion.Euler(
+            0f,
+            0f,
+            tilt
+        );
+
+        // --------------------------------------------------
+        // SMOOTH / INSTANT
+        // --------------------------------------------------
+
+        if (smoothTilt)
+        {
+            transform.localRotation = Quaternion.Lerp(
+                transform.localRotation,
+                targetRotation,
+                tiltSmoothSpeed * Time.deltaTime
+            );
+        }
+        else
+        {
+            // Instant snap
+            transform.localRotation = targetRotation;
+        }
     }
 
     // --------------------------------------------------
@@ -116,6 +237,7 @@ public class PlayerMovement : MonoBehaviour
             jumpTime < maxJumpTime)
         {
             rb.AddForce(Vector2.up * jumpHoldForce);
+
             jumpTime += Time.fixedDeltaTime;
         }
     }
@@ -126,12 +248,10 @@ public class PlayerMovement : MonoBehaviour
 
     public void BetterGravity()
     {
-        // Going UP
         if (rb.linearVelocity.y > 0)
         {
             rb.gravityScale = jumpGravity;
         }
-        // Going DOWN
         else
         {
             rb.gravityScale = fallGravity;

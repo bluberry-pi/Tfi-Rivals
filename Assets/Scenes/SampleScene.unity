@@ -158,6 +158,11 @@ MonoBehaviour:
   maxJumpTime: 0.2
   jumpGravity: 4
   fallGravity: 5
+  enableRunningTilt: 0
+  smoothTilt: 1
+  runTiltAmount: 6
+  runTiltSpeed: 5
+  tiltSmoothSpeed: 10
   horizontal: 0
 --- !u!4 &215218720
 Transform:
@@ -992,9 +997,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteGlowFade
   glowMaterial: {fileID: 2100000, guid: 88d455d06db4a2641b4211ea03d472c2, type: 2}
   glowColor: {r: 1, g: 1, b: 1, a: 1}
-  glowIntensity: 2
+  glowIntensity: 1.36
   outlineOffset: 0.05
-  outlineDirections: 5
+  outlineDirections: 4
   fadeDuration: 0.1
   bloomVolume: {fileID: 514010972}
   bloomIntensity: 1
@@ -1197,9 +1202,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteGlowFade
   glowMaterial: {fileID: 2100000, guid: 88d455d06db4a2641b4211ea03d472c2, type: 2}
   glowColor: {r: 1, g: 1, b: 1, a: 1}
-  glowIntensity: 2
+  glowIntensity: 1.39
   outlineOffset: 0.05
-  outlineDirections: 5
+  outlineDirections: 4
   fadeDuration: 0.1
   bloomVolume: {fileID: 514010972}
   bloomIntensity: 1
