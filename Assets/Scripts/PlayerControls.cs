@@ -17,15 +17,21 @@ public class PlayerControls : MonoBehaviour
     [Header("Running Tilt")]
     public bool enableRunningTilt = true;
     public bool smoothTilt = true;
+    public float runTiltAmount = 6f;
+    public float runTiltSpeed = 7f;
+    public float tiltSmoothSpeed = 12f;
+
     [Header("Punch")]
     public bool isPunchPressed = false;
     public float punchTime = 0.2f;
 
     private float punchTimer;
 
-    public float runTiltAmount = 6f;
-    public float runTiltSpeed = 7f;
-    public float tiltSmoothSpeed = 12f;
+    [Header("Kick")]
+    public bool isKickPressed = false;
+    public float kickTime = 0.2f;
+
+    private float kickTimer;
 
     public float horizontal;
 
@@ -58,6 +64,11 @@ public class PlayerControls : MonoBehaviour
         if (isPunchPressed)
         {
             Punch();
+        }
+
+        if (isKickPressed)
+        {
+            Kick();
         }
     }
 
@@ -112,6 +123,16 @@ public class PlayerControls : MonoBehaviour
         if (punchTimer <= 0f)
         {
             isPunchPressed = false;
+        }
+    }
+
+    public void Kick()
+    {
+        kickTimer -= Time.deltaTime;
+
+        if (kickTimer <= 0f)
+        {
+            isKickPressed = false;
         }
     }
 
@@ -219,6 +240,15 @@ public class PlayerControls : MonoBehaviour
         {
             isPunchPressed = true;
             punchTimer = punchTime;
+        }
+    }
+
+    public void Kick(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            isKickPressed = true;
+            kickTimer = kickTime;
         }
     }
 
