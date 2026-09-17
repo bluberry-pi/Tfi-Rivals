@@ -12,12 +12,20 @@ public class PlayerTransition : MonoBehaviour
 
     private PlayerMovement playerMovement;
 
+    // Glow components living on the Idle/Run GameObjects (optional —
+    // if one is missing, that state just won't glow).
+    private SpriteGlowFade idleGlow;
+    private SpriteGlowFade runGlow;
+
     private bool isRunning = false;
     private bool isTransitioning = false;
 
     void Start()
     {
         playerMovement = GetComponent<PlayerMovement>();
+
+        idleGlow = idle.GetComponent<SpriteGlowFade>();
+        runGlow = run.GetComponent<SpriteGlowFade>();
 
         // Start in Idle
         SetIdle();
@@ -83,6 +91,9 @@ public class PlayerTransition : MonoBehaviour
         run.SetActive(false);
 
         isRunning = false;
+
+        if (idleGlow != null)
+            idleGlow.Play();
     }
 
     // --------------------------------------------------
@@ -95,5 +106,8 @@ public class PlayerTransition : MonoBehaviour
         run.SetActive(true);
 
         isRunning = true;
+
+        if (runGlow != null)
+            runGlow.Play();
     }
 }
