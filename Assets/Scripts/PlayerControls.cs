@@ -51,7 +51,6 @@ public class PlayerControls : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
-        transform.localScale = new Vector3(1, 1, 1);
         transform.localRotation = Quaternion.identity;
     }
 
@@ -99,12 +98,12 @@ public class PlayerControls : MonoBehaviour
         if (horizontal > 0)
         {
             // Face right
-            transform.localScale = new Vector3(1, 1, 1);
+            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
         }
         else if (horizontal < 0)
         {
             // Face left
-            transform.localScale = new Vector3(-1, 1, 1);
+            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
         }
     }
 
