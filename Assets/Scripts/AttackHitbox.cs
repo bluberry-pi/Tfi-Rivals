@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 
 public class AttackHitbox : MonoBehaviour
 {
     private bool alreadyHit = false;
-
+    [SerializeField] private AudioClip[] damageSoundClips;
     private void OnEnable()
     {
         alreadyHit = false;
@@ -29,10 +30,12 @@ public class AttackHitbox : MonoBehaviour
 
         if (attacker.name.StartsWith("Mahesh", System.StringComparison.OrdinalIgnoreCase))
         {
+            SoundFXManager.instance.PlayRandomSoundFXClip(damageSoundClips, transform, 1f);
             Debug.Log("Mahesh hit Pawan");
         }
         else if (attacker.name.StartsWith("Pawan", System.StringComparison.OrdinalIgnoreCase))
         {
+            SoundFXManager.instance.PlayRandomSoundFXClip(damageSoundClips, transform, 1f);
             Debug.Log("Pawan hit Mahesh");
         }
 
