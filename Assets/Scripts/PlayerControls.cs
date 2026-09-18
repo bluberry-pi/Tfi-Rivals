@@ -28,14 +28,14 @@ public class PlayerControls : MonoBehaviour
     [Header("Punch")]
     public bool isPunchPressed = false;
     public float punchTime = 0.2f;
-
-    private float punchTimer;
+    public float punchCooldown = 0.12f;
 
     [Header("Kick")]
     public bool isKickPressed = false;
     public float kickTime = 0.2f;
+    public float kickCooldown = 0.12f;
 
-    private float kickTimer;
+    private PlayerTransition playerTransition;
 
     public float horizontal;
 
@@ -50,11 +50,18 @@ public class PlayerControls : MonoBehaviour
     float tiltTimer;
     bool tiltRight;
 
+    void Awake()
+    {
+        playerTransition = GetComponent<PlayerTransition>();
+    }
+
     // START
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        if (playerTransition == null)
+            playerTransition = GetComponent<PlayerTransition>();
 
         transform.localRotation = Quaternion.identity;
     }
@@ -64,16 +71,6 @@ public class PlayerControls : MonoBehaviour
     void Update()
     {
         RunningJuice();
-
-        if (isPunchPressed)
-        {
-            Punch();
-        }
-
-        if (isKickPressed)
-        {
-            Kick();
-        }
     }
 
     // FIXED UPDATE
@@ -124,21 +121,17 @@ public class PlayerControls : MonoBehaviour
 
     public void Punch()
     {
-        punchTimer -= Time.deltaTime;
-
-        if (punchTimer <= 0f)
+        if (playerTransition != null)
         {
-            isPunchPressed = false;
+            playerTransition.TriggerPunch();
         }
     }
 
     public void Kick()
     {
-        kickTimer -= Time.deltaTime;
-
-        if (kickTimer <= 0f)
+        if (playerTransition != null)
         {
-            isKickPressed = false;
+            playerTransition.TriggerKick();
         }
     }
 
@@ -234,18 +227,12 @@ public class PlayerControls : MonoBehaviour
             {
                 jumpPressed = true;
                 jumpHeld = true;
-                Debug.Log("<color=cyan>[Jump] Button pressed: CAN JUMP (Character is grounded: true)</color>");
-            }
-            else
-            {
-                Debug.LogWarning("<color=orange>[Jump] Button pressed: CANNOT JUMP (Character is in air / grounded: false)</color>");
             }
         }
 
         if (context.canceled)
         {
             jumpHeld = false;
-            Debug.Log("[Jump] Button released (jumpHeld: false)");
         }
     }
 
@@ -253,8 +240,25 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.started)
         {
-            isPunchPressed = true;
-            punchTimer = punchTime;
+            if (playerTransition != null)
+            {
+                playerTransition.OnPunchPressed();
+            }
+            else
+            {
+                isPunchPressed = true;
+            }
+        }
+        else if (context.canceled)
+        {
+            if (playerTransition != null)
+            {
+                playerTransition.OnPunchReleased();
+            }
+            else
+            {
+                isPunchPressed = false;
+            }
         }
     }
 
@@ -262,8 +266,25 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.started)
         {
-            isKickPressed = true;
-            kickTimer = kickTime;
+            if (playerTransition != null)
+            {
+                playerTransition.OnKickPressed();
+            }
+            else
+            {
+                isKickPressed = true;
+            }
+        }
+        else if (context.canceled)
+        {
+            if (playerTransition != null)
+            {
+                playerTransition.OnKickReleased();
+            }
+            else
+            {
+                isKickPressed = false;
+            }
         }
     }
 
@@ -278,7 +299,6 @@ public class PlayerControls : MonoBehaviour
 
         isGrounded = false;
         groundTriggerCount = 0;
-        Debug.Log($"<color=cyan>[Jump] Executed Jump! Velocity: {rb.linearVelocity}, Force: {jumpForce}, isGrounded set to false (in air)</color>");
     }
 
     // VARIABLE JUMP
@@ -324,11 +344,6 @@ public class PlayerControls : MonoBehaviour
             groundTriggerCount++;
             isGrounded = true;
             rb.gravityScale = 1f;
-            Debug.Log($"<color=green>[GroundCheck] Trigger entered '{other.name}' (Tag: Ground) -> GROUNDED: TRUE (Can jump)</color>");
-        }
-        else
-        {
-            Debug.Log($"[GroundCheck] Trigger touched '{other.name}' (Tag: '{other.tag}')");
         }
     }
 
@@ -348,11 +363,6 @@ public class PlayerControls : MonoBehaviour
             if (groundTriggerCount == 0)
             {
                 isGrounded = false;
-                Debug.Log($"<color=yellow>[GroundCheck] Trigger left '{other.name}' (Tag: Ground) -> IN AIR / GROUNDED: FALSE (Cannot jump)</color>");
-            }
-            else
-            {
-                Debug.Log($"[GroundCheck] Trigger left one ground surface, but still overlapping another -> GROUNDED remains TRUE");
             }
         }
     }

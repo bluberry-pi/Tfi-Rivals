@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    [Header("Hearts")]
     public Image[] hearts;
 
     private int currentHearts;
@@ -11,7 +10,6 @@ public class PlayerHealth : MonoBehaviour
     private void Start()
     {
         currentHearts = hearts.Length;
-
         UpdateHearts();
     }
 
@@ -29,11 +27,6 @@ public class PlayerHealth : MonoBehaviour
         );
 
         UpdateHearts();
-
-        if (currentHearts <= 0)
-        {
-            KO();
-        }
     }
 
     private void UpdateHearts()
@@ -42,10 +35,5 @@ public class PlayerHealth : MonoBehaviour
         {
             hearts[i].enabled = i < currentHearts;
         }
-    }
-
-    private void KO()
-    {
-        Debug.Log(gameObject.name + " has been KO'd!");
     }
 }
