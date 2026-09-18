@@ -1,16 +1,78 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
-    public Image[] hearts;
+    [Header("Hearts (GameObjects)")]
+    public GameObject[] hearts;
 
-    private int currentHearts;
+    [SerializeField] private int currentHearts;
+
+    public int CurrentHearts => currentHearts;
 
     private void Start()
     {
-        currentHearts = hearts.Length;
-        UpdateHearts();
+        // Auto-detect hearts in the scene if not assigned in Inspector
+        if (hearts == null || hearts.Length == 0)
+        {
+            AutoFindHearts();
+        }
+
+        currentHearts = CountActiveHearts();
+    }
+
+    private void AutoFindHearts()
+    {
+        string cleanName = gameObject.name.Replace("(Clone)", "").Trim();
+
+        // 1. Try finding container GameObject matching "[Name]Hearts" or "[Name]Health"
+        GameObject container = GameObject.Find(cleanName + "Hearts");
+        if (container == null)
+            container = GameObject.Find(cleanName + "Health");
+
+        // 2. Fallback: search scene objects if named differently
+        if (container == null)
+        {
+            GameObject[] allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+            foreach (GameObject go in allObjects)
+            {
+                if (go.name.IndexOf(cleanName, System.StringComparison.OrdinalIgnoreCase) >= 0 &&
+                    (go.name.IndexOf("Heart", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                     go.name.IndexOf("Health", System.StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    container = go;
+                    break;
+                }
+            }
+        }
+
+        if (container != null)
+        {
+            int childCount = container.transform.childCount;
+            hearts = new GameObject[childCount];
+            for (int i = 0; i < childCount; i++)
+            {
+                hearts[i] = container.transform.GetChild(i).gameObject;
+            }
+
+            // Sort numbered children (e.g., "1", "2", "3", "4", "5") in ascending order
+            System.Array.Sort(hearts, (a, b) =>
+            {
+                if (int.TryParse(a.name, out int numA) && int.TryParse(b.name, out int numB))
+                    return numA.CompareTo(numB);
+                return string.Compare(a.name, b.name, System.StringComparison.Ordinal);
+            });
+        }
+    }
+
+    private int CountActiveHearts()
+    {
+        if (hearts == null) return 0;
+        int count = 0;
+        for (int i = 0; i < hearts.Length; i++)
+        {
+            if (hearts[i] != null) count++;
+        }
+        return count;
     }
 
     public void TakeHit()
@@ -34,23 +96,26 @@ public class PlayerHealth : MonoBehaviour
 
         currentHearts--;
 
+        // 3. Destroy / delete the last remaining heart GameObject in the array
+        if (hearts != null)
+        {
+            for (int i = hearts.Length - 1; i >= 0; i--)
+            {
+                if (hearts[i] != null)
+                {
+                    GameObject heartToDestroy = hearts[i];
+                    hearts[i] = null; // Clear reference
+                    heartToDestroy.SetActive(false); // Immediately hide
+                    Destroy(heartToDestroy); // Delete GameObject from scene
+                    break;
+                }
+            }
+        }
+
         Debug.Log(
             gameObject.name +
             " lost a heart! Hearts remaining: " +
             currentHearts
         );
-
-        UpdateHearts();
-    }
-
-    private void UpdateHearts()
-    {
-        if (hearts == null) return;
-
-        for (int i = 0; i < hearts.Length; i++)
-        {
-            if (hearts[i] != null)
-                hearts[i].enabled = i < currentHearts;
-        }
     }
 }
