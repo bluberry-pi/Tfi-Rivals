@@ -143,25 +143,22 @@ public class PlayerTransition : MonoBehaviour
 
     public void OnBlockPressed()
     {
-        // Block is ONLY allowed when Idle is currently active
-        if (idle == null || !idle.activeSelf)
-            return;
-
         // Cannot block during attacks
         if (isAttacking)
             return;
 
-        // Cannot block during transitions
-        if (isTransitioning)
-            return;
+        // Stop any active movement transition
+        if (currentMovementRoutine != null)
+        {
+            StopCoroutine(currentMovementRoutine);
+            currentMovementRoutine = null;
+            isTransitioning = false;
+        }
 
         blockHeld = true;
+        isRunning = false;
 
-        // Keep IDLE ON
-        if (idle != null)
-            idle.SetActive(true);
-
-        // Make sure other states are OFF
+        // Make sure movement/attack states are OFF
         if (run != null)
             run.SetActive(false);
 
@@ -170,6 +167,10 @@ public class PlayerTransition : MonoBehaviour
 
         if (kick != null)
             kick.SetActive(false);
+
+        // Keep IDLE ON
+        if (idle != null)
+            idle.SetActive(true);
 
         // Turn BLOCK ON
         if (block != null)
@@ -188,20 +189,8 @@ public class PlayerTransition : MonoBehaviour
         if (block != null)
             block.SetActive(false);
 
-        // Keep IDLE ON
-        if (idle != null)
-            idle.SetActive(true);
-
-        if (run != null)
-            run.SetActive(false);
-
-        if (punch != null)
-            punch.SetActive(false);
-
-        if (kick != null)
-            kick.SetActive(false);
-
-        isRunning = false;
+        // Return to neutral pose (Idle or Run depending on movement input)
+        UpdateNeutralPose();
     }
 
     // =========================================================
@@ -493,12 +482,9 @@ public class PlayerTransition : MonoBehaviour
 
     private void UpdateNeutralPose()
     {
-        // If blocking, stay blocking
+        // If blocking, stay blocking in Idle pose
         if (blockHeld)
         {
-            if (idle != null)
-                idle.SetActive(false);
-
             if (run != null)
                 run.SetActive(false);
 
@@ -507,6 +493,9 @@ public class PlayerTransition : MonoBehaviour
 
             if (kick != null)
                 kick.SetActive(false);
+
+            if (idle != null)
+                idle.SetActive(true);
 
             if (block != null)
                 block.SetActive(true);
