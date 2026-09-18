@@ -5,6 +5,10 @@ public class PlayerControls : MonoBehaviour
 {
     public float speed = 5f;
 
+    [Header("Facing Direction")]
+    [Tooltip("Enable this if the source sprite naturally faces left (e.g. Pawan)")]
+    public bool defaultFacingLeft = false;
+
     [Header("Jump")]
     public float jumpForce = 10f;
     public float jumpHoldForce = 10f;
@@ -99,12 +103,14 @@ public class PlayerControls : MonoBehaviour
         if (horizontal > 0)
         {
             // Face right
-            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            float scaleX = defaultFacingLeft ? -Mathf.Abs(transform.localScale.x) : Mathf.Abs(transform.localScale.x);
+            transform.localScale = new Vector3(scaleX, transform.localScale.y, transform.localScale.z);
         }
         else if (horizontal < 0)
         {
             // Face left
-            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+            float scaleX = defaultFacingLeft ? Mathf.Abs(transform.localScale.x) : -Mathf.Abs(transform.localScale.x);
+            transform.localScale = new Vector3(scaleX, transform.localScale.y, transform.localScale.z);
         }
     }
 
