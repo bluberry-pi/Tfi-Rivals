@@ -1,0 +1,225 @@
+fileFormatVersion: 2
+guid: 6638ce16d7c799f4c81aa74dd5611454
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8922922121795823799
+    second: pawan_kick_0
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 110
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: pawan_kick_0
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 57
+        width: 376
+        height: 505
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape:
+      - - {x: 114, y: -245.5}
+        - {x: 115, y: -234.5}
+        - {x: 83, y: -213.5}
+        - {x: 77, y: -181.5}
+        - {x: 90, y: -90.5}
+        - {x: 91, y: -22.5}
+        - {x: 80, y: 20.5}
+        - {x: 87, y: 24.5}
+        - {x: 89, y: 38.5}
+        - {x: 103, y: 61.5}
+        - {x: 130, y: 101.5}
+        - {x: 137, y: 99.5}
+        - {x: 166, y: 75.5}
+        - {x: 179, y: 75.5}
+        - {x: 186, y: 83.5}
+        - {x: 186, y: 111.5}
+        - {x: 181, y: 121.5}
+        - {x: 179, y: 124.5}
+        - {x: 156, y: 170.5}
+        - {x: 152, y: 176.5}
+        - {x: 136, y: 175.5}
+        - {x: 125, y: 166.5}
+        - {x: 135, y: 183.5}
+        - {x: 146, y: 210.5}
+        - {x: 146, y: 219.5}
+        - {x: 137, y: 242.5}
+        - {x: 124, y: 249.5}
+        - {x: 121, y: 250.5}
+        - {x: 105, y: 250.5}
+        - {x: 90, y: 248.5}
+        - {x: 68, y: 232.5}
+        - {x: 69, y: 204.5}
+        - {x: 78, y: 183.5}
+        - {x: 66, y: 184.5}
+        - {x: 41, y: 180.5}
+        - {x: 31, y: 176.5}
+        - {x: -14, y: 144.5}
+        - {x: -24, y: 135.5}
+        - {x: -31, y: 131.5}
+        - {x: -66, y: 145.5}
+        - {x: -120, y: 165.5}
+        - {x: -133, y: 171.5}
+        - {x: -142, y: 186.5}
+        - {x: -138, y: 204.5}
+        - {x: -151, y: 219.5}
+        - {x: -165, y: 217.5}
+        - {x: -181, y: 197.5}
+        - {x: -184, y: 185.5}
+        - {x: -186, y: 151.5}
+        - {x: -186, y: 128.5}
+        - {x: -179, y: 119.5}
+        - {x: -169, y: 120.5}
+        - {x: -151, y: 120.5}
+        - {x: -143, y: 115.5}
+        - {x: -104, y: 102.5}
+        - {x: -54, y: 75.5}
+        - {x: -31, y: 54.5}
+        - {x: -4, y: 28.5}
+        - {x: 15, y: 6.5}
+        - {x: 25, y: -24.5}
+        - {x: 40, y: -80.5}
+        - {x: 39, y: -103.5}
+        - {x: 28, y: -186.5}
+        - {x: 28, y: -205.5}
+        - {x: 25, y: -230.5}
+        - {x: 27, y: -249.5}
+        - {x: 59, y: -247.5}
+        - {x: 69, y: -250.5}
+        - {x: 107, y: -250.5}
+      tessellationDetail: 0.15
+      bones: []
+      spriteID: 7b86d14e46694db70800000000000000
+      internalID: 8922922121795823799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 2979563825ae12e4db8e979d8e37ff45
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      pawan_kick_0: 8922922121795823799
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
