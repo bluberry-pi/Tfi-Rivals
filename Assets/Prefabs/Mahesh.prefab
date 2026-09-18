@@ -332,6 +332,10 @@ MonoBehaviour:
   punchCooldown: 0.12
   kickCooldown: 0.12
   autoRepeatOnHold: 1
+  glowMaterial: {fileID: 2100000, guid: 88d455d06db4a2641b4211ea03d472c2, type: 2}
+  hitGlowColor: {r: 1, g: 1, b: 1, a: 1}
+  hitGlowIntensity: 1
+  hitGlowDuration: 0.15
 --- !u!114 &6223554291514990163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -642,7 +646,6 @@ GameObject:
   - component: {fileID: 2343242159414111193}
   - component: {fileID: 7564170972123667804}
   - component: {fileID: 2535686905535094866}
-  - component: {fileID: 8139989470792139892}
   m_Layer: 6
   m_Name: Run
   m_TagString: Untagged
@@ -821,26 +824,6 @@ PolygonCollider2D:
       - {x: -0.70689654, y: -2.814655}
       - {x: -0.18103448, y: -2.814655}
   m_UseDelaunayMesh: 1
---- !u!114 &8139989470792139892
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6503356060860432798}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d9a1f52c48cba24282185922dfd6e3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpriteGlowFade
-  glowMaterial: {fileID: 2100000, guid: 88d455d06db4a2641b4211ea03d472c2, type: 2}
-  glowColor: {r: 1, g: 1, b: 1, a: 1}
-  glowIntensity: 1.36
-  outlineOffset: 0.05
-  outlineDirections: 4
-  fadeDuration: 0.1
-  bloomVolume: {fileID: 0}
-  bloomIntensity: 1
 --- !u!1 &7041072375740526307
 GameObject:
   m_ObjectHideFlags: 0
@@ -943,7 +926,6 @@ GameObject:
   - component: {fileID: 6429805213584070541}
   - component: {fileID: 3440740588438680892}
   - component: {fileID: 6418098753159155743}
-  - component: {fileID: 7726098299716049718}
   m_Layer: 6
   m_Name: Idle
   m_TagString: Untagged
@@ -1117,26 +1099,6 @@ PolygonCollider2D:
       - {x: -0.84, y: -2.865}
       - {x: -0.5, y: -2.865}
   m_UseDelaunayMesh: 1
---- !u!114 &7726098299716049718
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8373667949872863844}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d9a1f52c48cba24282185922dfd6e3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpriteGlowFade
-  glowMaterial: {fileID: 2100000, guid: 88d455d06db4a2641b4211ea03d472c2, type: 2}
-  glowColor: {r: 1, g: 1, b: 1, a: 1}
-  glowIntensity: 1.39
-  outlineOffset: 0.05
-  outlineDirections: 4
-  fadeDuration: 0.1
-  bloomVolume: {fileID: 0}
-  bloomIntensity: 1
 --- !u!1 &8531226600799857162
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,12 +3,6 @@ using UnityEngine;
 public class AttackHitbox : MonoBehaviour
 {
     private bool alreadyHit = false;
-    private GameObject owner;
-
-    private void Awake()
-    {
-        owner = transform.root.gameObject;
-    }
 
     private void OnEnable()
     {
@@ -20,22 +14,30 @@ public class AttackHitbox : MonoBehaviour
         if (alreadyHit)
             return;
 
-        // Don't hit yourself
-        if (other.transform.root.gameObject == owner)
-            return;
-
+        // Find the player who owns the collider that was hit
         PlayerHealth target = other.GetComponentInParent<PlayerHealth>();
 
         if (target == null)
             return;
 
+        // Check which player this hitbox belongs to
+        GameObject attacker = transform.root.gameObject;
+
+        // Prevent hitting oneself
+        if (target.gameObject == attacker)
+            return;
+
+        if (attacker.name.StartsWith("Mahesh", System.StringComparison.OrdinalIgnoreCase))
+        {
+            Debug.Log("Mahesh hit Pawan");
+        }
+        else if (attacker.name.StartsWith("Pawan", System.StringComparison.OrdinalIgnoreCase))
+        {
+            Debug.Log("Pawan hit Mahesh");
+        }
+
         target.TakeHit();
 
         alreadyHit = true;
-
-        Debug.Log(
-            owner.name + " hit " +
-            target.gameObject.name
-        );
     }
 }

@@ -15,6 +15,20 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeHit()
     {
+        // 1. Play hit glow on the character who received the hit
+        PlayerTransition transition = GetComponent<PlayerTransition>();
+        if (transition != null)
+        {
+            transition.PlayHitGlow();
+        }
+        else
+        {
+            SpriteGlowFade glow = GetComponent<SpriteGlowFade>();
+            if (glow != null)
+                glow.Play();
+        }
+
+        // 2. Process damage
         if (currentHearts <= 0)
             return;
 
@@ -31,9 +45,12 @@ public class PlayerHealth : MonoBehaviour
 
     private void UpdateHearts()
     {
+        if (hearts == null) return;
+
         for (int i = 0; i < hearts.Length; i++)
         {
-            hearts[i].enabled = i < currentHearts;
+            if (hearts[i] != null)
+                hearts[i].enabled = i < currentHearts;
         }
     }
 }

@@ -6,7 +6,6 @@ public class PlayerControls : MonoBehaviour
     public float speed = 5f;
 
     [Header("Facing Direction")]
-    [Tooltip("Enable this if the source sprite naturally faces left (e.g. Pawan)")]
     public bool defaultFacingLeft = false;
 
     [Header("Jump")]

@@ -24,11 +24,13 @@ public class PlayerTransition : MonoBehaviour
 
     private PlayerControls playerMovement;
 
-    // Glow components
-    private SpriteGlowFade idleGlow;
-    private SpriteGlowFade runGlow;
-    private SpriteGlowFade punchGlow;
-    private SpriteGlowFade kickGlow;
+    [Header("Hit Glow Settings")]
+    public Material glowMaterial;
+    public Color hitGlowColor = Color.white;
+    public float hitGlowIntensity = 2f;
+    public float hitGlowDuration = 0.15f;
+
+    private SpriteGlowFade hitGlow;
 
     private bool isRunning = false;
     private bool isTransitioning = false;
@@ -54,10 +56,7 @@ public class PlayerTransition : MonoBehaviour
         if (playerMovement == null)
             playerMovement = GetComponent<PlayerControls>();
 
-        idleGlow = idle != null ? idle.GetComponent<SpriteGlowFade>() : null;
-        runGlow = run != null ? run.GetComponent<SpriteGlowFade>() : null;
-        punchGlow = punch != null ? punch.GetComponent<SpriteGlowFade>() : null;
-        kickGlow = kick != null ? kick.GetComponent<SpriteGlowFade>() : null;
+        EnsureHitGlow();
 
         // Start in Idle
         SetIdle();
@@ -191,9 +190,6 @@ public class PlayerTransition : MonoBehaviour
         if (kick != null) kick.SetActive(false);
         if (punch != null) punch.SetActive(true);
 
-        // Glow should play right after the object becomes active
-        if (punchGlow != null)
-            punchGlow.Play();
 
         // 3. Keep punch active for punchTime
         float activeDuration = (playerMovement != null && playerMovement.punchTime > 0f)
@@ -283,9 +279,6 @@ public class PlayerTransition : MonoBehaviour
         if (punch != null) punch.SetActive(false);
         if (kick != null) kick.SetActive(true);
 
-        // Glow should play right after the object becomes active
-        if (kickGlow != null)
-            kickGlow.Play();
 
         // 3. Keep kick active for kickTime
         float activeDuration = (playerMovement != null && playerMovement.kickTime > 0f)
@@ -405,8 +398,6 @@ public class PlayerTransition : MonoBehaviour
 
         isRunning = false;
 
-        if (idleGlow != null)
-            idleGlow.Play();
     }
 
     // --------------------------------------------------
@@ -422,7 +413,62 @@ public class PlayerTransition : MonoBehaviour
 
         isRunning = true;
 
-        if (runGlow != null)
-            runGlow.Play();
+    }
+
+    // --------------------------------------------------
+    // HIT GLOW
+    // --------------------------------------------------
+
+    public void PlayHitGlow()
+    {
+        if (hitGlow == null)
+            EnsureHitGlow();
+
+        if (hitGlow != null)
+        {
+            hitGlow.Play();
+            return;
+        }
+
+        // Fallback to active child state's SpriteGlowFade if present
+        if (idle != null && idle.activeSelf)
+        {
+            var g = idle.GetComponent<SpriteGlowFade>();
+            if (g != null) g.Play();
+        }
+        else if (run != null && run.activeSelf)
+        {
+            var g = run.GetComponent<SpriteGlowFade>();
+            if (g != null) g.Play();
+        }
+        else if (punch != null && punch.activeSelf)
+        {
+            var g = punch.GetComponent<SpriteGlowFade>();
+            if (g != null) g.Play();
+        }
+        else if (kick != null && kick.activeSelf)
+        {
+            var g = kick.GetComponent<SpriteGlowFade>();
+            if (g != null) g.Play();
+        }
+    }
+
+    private void EnsureHitGlow()
+    {
+        hitGlow = GetComponent<SpriteGlowFade>();
+        if (hitGlow == null)
+        {
+            hitGlow = gameObject.AddComponent<SpriteGlowFade>();
+        }
+
+        if (glowMaterial != null && hitGlow.glowMaterial == null)
+        {
+            hitGlow.glowMaterial = glowMaterial;
+        }
+
+        hitGlow.glowColor = hitGlowColor;
+        hitGlow.glowIntensity = hitGlowIntensity;
+        hitGlow.fadeDuration = hitGlowDuration;
+        hitGlow.enabled = true;
     }
 }
