@@ -8,18 +8,15 @@ public class PlayerTransition : MonoBehaviour
     public GameObject run;
     public GameObject punch;
     public GameObject kick;
+    public GameObject block;
 
     [Header("Transition Timing")]
     public float transitionTime = 0.2f;
 
     [Header("Attack Recovery / Cooldown")]
-    [Tooltip("How long the character visibly returns to Idle/Run before another punch can come out when spamming")]
     public float punchCooldown = 0.12f;
-
-    [Tooltip("How long the character visibly returns to Idle/Run before another kick can come out when spamming")]
     public float kickCooldown = 0.12f;
 
-    [Tooltip("If true, holding down punch/kick will automatically chain attacks with visible retraction")]
     public bool autoRepeatOnHold = false;
 
     private PlayerControls playerMovement;
@@ -38,13 +35,17 @@ public class PlayerTransition : MonoBehaviour
 
     private bool punchBuffered = false;
     private bool kickBuffered = false;
+
     private bool punchHeld = false;
     private bool kickHeld = false;
+
+    private bool blockHeld = false;
 
     private Coroutine currentAttackRoutine = null;
     private Coroutine currentMovementRoutine = null;
 
     public bool IsAttacking => isAttacking;
+    public bool IsBlocking => blockHeld;
 
     void Awake()
     {
@@ -56,61 +57,165 @@ public class PlayerTransition : MonoBehaviour
         if (playerMovement == null)
             playerMovement = GetComponent<PlayerControls>();
 
+        if (block == null)
+        {
+            Transform found = transform.Find("Sheild") ?? transform.Find("Shield") ?? transform.Find("Block");
+            if (found != null)
+                block = found.gameObject;
+        }
+
         EnsureHitGlow();
 
-        // Start in Idle
+        if (block != null)
+            block.SetActive(false);
+
         SetIdle();
     }
 
     void OnDisable()
     {
-        // Reset state on disable to prevent stuck attacks
         StopAllCoroutines();
+
         currentAttackRoutine = null;
         currentMovementRoutine = null;
+
         isAttacking = false;
         isTransitioning = false;
+
         punchBuffered = false;
         kickBuffered = false;
+
         punchHeld = false;
         kickHeld = false;
+        blockHeld = false;
+
         if (playerMovement != null)
         {
             playerMovement.isPunchPressed = false;
             playerMovement.isKickPressed = false;
+            playerMovement.isBlockPressed = false;
         }
+
+        if (block != null)
+            block.SetActive(false);
     }
+
+    // =========================================================
+    // UPDATE
+    // =========================================================
 
     void Update()
     {
-        // If attacking, the attack coroutine manages attack and neutral states
+        // While blocking, do absolutely nothing with
+        // the Idle/Run transition system.
+        if (blockHeld)
+            return;
+
+        // Attacks control their own states.
         if (isAttacking)
             return;
 
         if (isTransitioning)
             return;
 
-        bool shouldRun = playerMovement != null && Mathf.Abs(playerMovement.horizontal) > 0.01f;
+        bool shouldRun =
+            playerMovement != null &&
+            Mathf.Abs(playerMovement.horizontal) > 0.01f;
 
         // Idle → Run
         if (shouldRun && !isRunning)
         {
-            currentMovementRoutine = StartCoroutine(TransitionToRun());
+            currentMovementRoutine =
+                StartCoroutine(TransitionToRun());
         }
+
         // Run → Idle
         else if (!shouldRun && isRunning)
         {
-            currentMovementRoutine = StartCoroutine(TransitionToIdle());
+            currentMovementRoutine =
+                StartCoroutine(TransitionToIdle());
         }
     }
 
-    // --------------------------------------------------
-    // ATTACK TRIGGERS
-    // --------------------------------------------------
+    // =========================================================
+    // BLOCK
+    // =========================================================
+
+    public void OnBlockPressed()
+    {
+        // Block is ONLY allowed when Idle is currently active
+        if (idle == null || !idle.activeSelf)
+            return;
+
+        // Cannot block during attacks
+        if (isAttacking)
+            return;
+
+        // Cannot block during transitions
+        if (isTransitioning)
+            return;
+
+        blockHeld = true;
+
+        // Keep IDLE ON
+        if (idle != null)
+            idle.SetActive(true);
+
+        // Make sure other states are OFF
+        if (run != null)
+            run.SetActive(false);
+
+        if (punch != null)
+            punch.SetActive(false);
+
+        if (kick != null)
+            kick.SetActive(false);
+
+        // Turn BLOCK ON
+        if (block != null)
+            block.SetActive(true);
+    }
+
+    public void OnBlockReleased()
+    {
+        // If block wasn't successfully activated, do nothing
+        if (!blockHeld)
+            return;
+
+        blockHeld = false;
+
+        // Turn BLOCK OFF
+        if (block != null)
+            block.SetActive(false);
+
+        // Keep IDLE ON
+        if (idle != null)
+            idle.SetActive(true);
+
+        if (run != null)
+            run.SetActive(false);
+
+        if (punch != null)
+            punch.SetActive(false);
+
+        if (kick != null)
+            kick.SetActive(false);
+
+        isRunning = false;
+    }
+
+    // =========================================================
+    // PUNCH
+    // =========================================================
 
     public void OnPunchPressed()
     {
+        // Can't punch while blocking
+        if (blockHeld)
+            return;
+
         punchHeld = true;
+
         TriggerPunch();
     }
 
@@ -119,9 +224,140 @@ public class PlayerTransition : MonoBehaviour
         punchHeld = false;
     }
 
+    public void TriggerPunch()
+    {
+        // Can't attack while blocking
+        if (blockHeld)
+            return;
+
+        if (isAttacking)
+        {
+            punchBuffered = true;
+            kickBuffered = false;
+            return;
+        }
+
+        currentAttackRoutine =
+            StartCoroutine(PunchRoutine());
+    }
+
+    // =========================================================
+    // PUNCH ROUTINE
+    // =========================================================
+
+    IEnumerator PunchRoutine()
+    {
+        if (blockHeld)
+            yield break;
+
+        isAttacking = true;
+        punchBuffered = false;
+
+        if (currentMovementRoutine != null)
+        {
+            StopCoroutine(currentMovementRoutine);
+            currentMovementRoutine = null;
+
+            isTransitioning = false;
+        }
+
+        if (playerMovement != null)
+            playerMovement.isPunchPressed = true;
+
+        if (transitionTime > 0f)
+            yield return new WaitForSeconds(transitionTime);
+
+        // Block cannot interrupt punch
+        if (blockHeld)
+        {
+            if (playerMovement != null)
+                playerMovement.isPunchPressed = false;
+
+            isAttacking = false;
+            currentAttackRoutine = null;
+
+            yield break;
+        }
+
+        if (idle != null)
+            idle.SetActive(false);
+
+        if (run != null)
+            run.SetActive(false);
+
+        if (kick != null)
+            kick.SetActive(false);
+
+        if (block != null)
+            block.SetActive(false);
+
+        if (punch != null)
+            punch.SetActive(true);
+
+        float activeDuration =
+            playerMovement != null &&
+            playerMovement.punchTime > 0f
+            ? playerMovement.punchTime
+            : 0.25f;
+
+        yield return new WaitForSeconds(activeDuration);
+
+        if (punch != null)
+            punch.SetActive(false);
+
+        if (playerMovement != null)
+            playerMovement.isPunchPressed = false;
+
+        UpdateNeutralPose();
+
+        float cooldown =
+            playerMovement != null &&
+            playerMovement.punchCooldown > 0f
+            ? playerMovement.punchCooldown
+            : punchCooldown;
+
+        if (cooldown > 0f)
+            yield return new WaitForSeconds(cooldown);
+
+        isAttacking = false;
+        currentAttackRoutine = null;
+
+        if (punchBuffered)
+        {
+            punchBuffered = false;
+            currentAttackRoutine =
+                StartCoroutine(PunchRoutine());
+        }
+        else if (kickBuffered)
+        {
+            kickBuffered = false;
+            currentAttackRoutine =
+                StartCoroutine(KickRoutine());
+        }
+        else if (autoRepeatOnHold && punchHeld)
+        {
+            currentAttackRoutine =
+                StartCoroutine(PunchRoutine());
+        }
+        else if (autoRepeatOnHold && kickHeld)
+        {
+            currentAttackRoutine =
+                StartCoroutine(KickRoutine());
+        }
+    }
+
+    // =========================================================
+    // KICK
+    // =========================================================
+
     public void OnKickPressed()
     {
+        // Can't kick while blocking
+        if (blockHeld)
+            return;
+
         kickHeld = true;
+
         TriggerKick();
     }
 
@@ -130,237 +366,184 @@ public class PlayerTransition : MonoBehaviour
         kickHeld = false;
     }
 
-    public void TriggerPunch()
-    {
-        if (isAttacking)
-        {
-            // Already attacking: buffer at most 1 punch so it executes after current attack finishes & recovers
-            punchBuffered = true;
-            kickBuffered = false;
-            return;
-        }
-
-        currentAttackRoutine = StartCoroutine(PunchRoutine());
-    }
-
     public void TriggerKick()
     {
+        // Can't attack while blocking
+        if (blockHeld)
+            return;
+
         if (isAttacking)
         {
-            // Already attacking: buffer at most 1 kick so it executes after current attack finishes & recovers
             kickBuffered = true;
             punchBuffered = false;
             return;
         }
 
-        currentAttackRoutine = StartCoroutine(KickRoutine());
+        currentAttackRoutine =
+            StartCoroutine(KickRoutine());
     }
 
-    // --------------------------------------------------
-    // PUNCH ROUTINE
-    // --------------------------------------------------
-
-    IEnumerator PunchRoutine()
-    {
-        isAttacking = true;
-        punchBuffered = false;
-
-        // Stop any active movement transition
-        if (currentMovementRoutine != null)
-        {
-            StopCoroutine(currentMovementRoutine);
-            currentMovementRoutine = null;
-            isTransitioning = false;
-        }
-
-        if (playerMovement != null)
-        {
-            playerMovement.isPunchPressed = true;
-        }
-
-        // 1. Optional transition delay (windup)
-        if (transitionTime > 0f)
-        {
-            yield return new WaitForSeconds(transitionTime);
-        }
-
-        // 2. Turn ON Punch Game Object!
-        if (idle != null) idle.SetActive(false);
-        if (run != null) run.SetActive(false);
-        if (kick != null) kick.SetActive(false);
-        if (punch != null) punch.SetActive(true);
-
-
-        // 3. Keep punch active for punchTime
-        float activeDuration = (playerMovement != null && playerMovement.punchTime > 0f)
-            ? playerMovement.punchTime
-            : 0.25f;
-
-        yield return new WaitForSeconds(activeDuration);
-
-        // 4. Turn OFF Punch Game Object! GUARANTEED!
-        if (punch != null) punch.SetActive(false);
-
-        if (playerMovement != null)
-        {
-            playerMovement.isPunchPressed = false;
-        }
-
-        // 5. Visibly return to neutral pose (Idle or Run)
-        UpdateNeutralPose();
-
-        // 6. Recovery delay: character visibly stays in Idle/Run
-        // so the player clearly sees the punch retract before the next punch
-        float cooldown = (playerMovement != null && playerMovement.punchCooldown > 0f)
-            ? playerMovement.punchCooldown
-            : punchCooldown;
-
-        if (cooldown > 0f)
-        {
-            yield return new WaitForSeconds(cooldown);
-        }
-
-        // 7. Attack cycle finished
-        isAttacking = false;
-        currentAttackRoutine = null;
-
-        // 8. If spammed, execute the single buffered attack
-        if (punchBuffered)
-        {
-            punchBuffered = false;
-            currentAttackRoutine = StartCoroutine(PunchRoutine());
-        }
-        else if (kickBuffered)
-        {
-            kickBuffered = false;
-            currentAttackRoutine = StartCoroutine(KickRoutine());
-        }
-        else if (autoRepeatOnHold && punchHeld)
-        {
-            currentAttackRoutine = StartCoroutine(PunchRoutine());
-        }
-        else if (autoRepeatOnHold && kickHeld)
-        {
-            currentAttackRoutine = StartCoroutine(KickRoutine());
-        }
-    }
-
-    // --------------------------------------------------
+    // =========================================================
     // KICK ROUTINE
-    // --------------------------------------------------
+    // =========================================================
 
     IEnumerator KickRoutine()
     {
+        if (blockHeld)
+            yield break;
+
         isAttacking = true;
         kickBuffered = false;
 
-        // Stop any active movement transition
         if (currentMovementRoutine != null)
         {
             StopCoroutine(currentMovementRoutine);
             currentMovementRoutine = null;
+
             isTransitioning = false;
         }
 
         if (playerMovement != null)
-        {
             playerMovement.isKickPressed = true;
-        }
 
-        // 1. Optional transition delay (windup)
         if (transitionTime > 0f)
-        {
             yield return new WaitForSeconds(transitionTime);
+
+        if (blockHeld)
+        {
+            if (playerMovement != null)
+                playerMovement.isKickPressed = false;
+
+            isAttacking = false;
+            currentAttackRoutine = null;
+
+            yield break;
         }
 
-        // 2. Turn ON Kick Game Object!
-        if (idle != null) idle.SetActive(false);
-        if (run != null) run.SetActive(false);
-        if (punch != null) punch.SetActive(false);
-        if (kick != null) kick.SetActive(true);
+        if (idle != null)
+            idle.SetActive(false);
 
+        if (run != null)
+            run.SetActive(false);
 
-        // 3. Keep kick active for kickTime
-        float activeDuration = (playerMovement != null && playerMovement.kickTime > 0f)
+        if (punch != null)
+            punch.SetActive(false);
+
+        if (block != null)
+            block.SetActive(false);
+
+        if (kick != null)
+            kick.SetActive(true);
+
+        float activeDuration =
+            playerMovement != null &&
+            playerMovement.kickTime > 0f
             ? playerMovement.kickTime
             : 0.25f;
 
         yield return new WaitForSeconds(activeDuration);
 
-        // 4. Turn OFF Kick Game Object! GUARANTEED!
-        if (kick != null) kick.SetActive(false);
+        if (kick != null)
+            kick.SetActive(false);
 
         if (playerMovement != null)
-        {
             playerMovement.isKickPressed = false;
-        }
 
-        // 5. Visibly return to neutral pose (Idle or Run)
         UpdateNeutralPose();
 
-        // 6. Recovery delay: character visibly stays in Idle/Run
-        // so the player clearly sees the kick retract before the next kick
-        float cooldown = (playerMovement != null && playerMovement.kickCooldown > 0f)
+        float cooldown =
+            playerMovement != null &&
+            playerMovement.kickCooldown > 0f
             ? playerMovement.kickCooldown
             : kickCooldown;
 
         if (cooldown > 0f)
-        {
             yield return new WaitForSeconds(cooldown);
-        }
 
-        // 7. Attack cycle finished
         isAttacking = false;
         currentAttackRoutine = null;
 
-        // 8. If spammed, execute the single buffered attack
         if (kickBuffered)
         {
             kickBuffered = false;
-            currentAttackRoutine = StartCoroutine(KickRoutine());
+            currentAttackRoutine =
+                StartCoroutine(KickRoutine());
         }
         else if (punchBuffered)
         {
             punchBuffered = false;
-            currentAttackRoutine = StartCoroutine(PunchRoutine());
+            currentAttackRoutine =
+                StartCoroutine(PunchRoutine());
         }
         else if (autoRepeatOnHold && kickHeld)
         {
-            currentAttackRoutine = StartCoroutine(KickRoutine());
+            currentAttackRoutine =
+                StartCoroutine(KickRoutine());
         }
         else if (autoRepeatOnHold && punchHeld)
         {
-            currentAttackRoutine = StartCoroutine(PunchRoutine());
+            currentAttackRoutine =
+                StartCoroutine(PunchRoutine());
         }
     }
 
-    // --------------------------------------------------
-    // UPDATE NEUTRAL POSE
-    // --------------------------------------------------
+    // =========================================================
+    // NEUTRAL POSE
+    // =========================================================
 
     private void UpdateNeutralPose()
     {
-        bool shouldRun = playerMovement != null && Mathf.Abs(playerMovement.horizontal) > 0.01f;
+        // If blocking, stay blocking
+        if (blockHeld)
+        {
+            if (idle != null)
+                idle.SetActive(false);
+
+            if (run != null)
+                run.SetActive(false);
+
+            if (punch != null)
+                punch.SetActive(false);
+
+            if (kick != null)
+                kick.SetActive(false);
+
+            if (block != null)
+                block.SetActive(true);
+
+            return;
+        }
+
+        bool shouldRun =
+            playerMovement != null &&
+            Mathf.Abs(playerMovement.horizontal) > 0.01f;
+
         if (shouldRun)
-        {
             SetRun();
-        }
         else
-        {
             SetIdle();
-        }
     }
 
-    // --------------------------------------------------
+    // =========================================================
     // IDLE → RUN
-    // --------------------------------------------------
+    // =========================================================
 
     IEnumerator TransitionToRun()
     {
+        if (blockHeld)
+            yield break;
+
         isTransitioning = true;
 
         if (transitionTime > 0f)
             yield return new WaitForSeconds(transitionTime);
+
+        if (blockHeld)
+        {
+            isTransitioning = false;
+            currentMovementRoutine = null;
+            yield break;
+        }
 
         SetRun();
 
@@ -368,16 +551,26 @@ public class PlayerTransition : MonoBehaviour
         currentMovementRoutine = null;
     }
 
-    // --------------------------------------------------
+    // =========================================================
     // RUN → IDLE
-    // --------------------------------------------------
+    // =========================================================
 
     IEnumerator TransitionToIdle()
     {
+        if (blockHeld)
+            yield break;
+
         isTransitioning = true;
 
         if (transitionTime > 0f)
             yield return new WaitForSeconds(transitionTime);
+
+        if (blockHeld)
+        {
+            isTransitioning = false;
+            currentMovementRoutine = null;
+            yield break;
+        }
 
         SetIdle();
 
@@ -385,39 +578,63 @@ public class PlayerTransition : MonoBehaviour
         currentMovementRoutine = null;
     }
 
-    // --------------------------------------------------
+    // =========================================================
     // SET IDLE
-    // --------------------------------------------------
+    // =========================================================
 
     void SetIdle()
     {
-        if (idle != null) idle.SetActive(true);
-        if (run != null) run.SetActive(false);
-        if (punch != null) punch.SetActive(false);
-        if (kick != null) kick.SetActive(false);
+        if (blockHeld)
+            return;
+
+        if (idle != null)
+            idle.SetActive(true);
+
+        if (run != null)
+            run.SetActive(false);
+
+        if (punch != null)
+            punch.SetActive(false);
+
+        if (kick != null)
+            kick.SetActive(false);
+
+        if (block != null)
+            block.SetActive(false);
 
         isRunning = false;
-
     }
 
-    // --------------------------------------------------
+    // =========================================================
     // SET RUN
-    // --------------------------------------------------
+    // =========================================================
 
     void SetRun()
     {
-        if (idle != null) idle.SetActive(false);
-        if (run != null) run.SetActive(true);
-        if (punch != null) punch.SetActive(false);
-        if (kick != null) kick.SetActive(false);
+        if (blockHeld)
+            return;
+
+        if (idle != null)
+            idle.SetActive(false);
+
+        if (run != null)
+            run.SetActive(true);
+
+        if (punch != null)
+            punch.SetActive(false);
+
+        if (kick != null)
+            kick.SetActive(false);
+
+        if (block != null)
+            block.SetActive(false);
 
         isRunning = true;
-
     }
 
-    // --------------------------------------------------
+    // =========================================================
     // HIT GLOW
-    // --------------------------------------------------
+    // =========================================================
 
     public void PlayHitGlow()
     {
@@ -430,38 +647,56 @@ public class PlayerTransition : MonoBehaviour
             return;
         }
 
-        // Fallback to active child state's SpriteGlowFade if present
         if (idle != null && idle.activeSelf)
         {
             var g = idle.GetComponent<SpriteGlowFade>();
-            if (g != null) g.Play();
+
+            if (g != null)
+                g.Play();
         }
         else if (run != null && run.activeSelf)
         {
             var g = run.GetComponent<SpriteGlowFade>();
-            if (g != null) g.Play();
+
+            if (g != null)
+                g.Play();
         }
         else if (punch != null && punch.activeSelf)
         {
             var g = punch.GetComponent<SpriteGlowFade>();
-            if (g != null) g.Play();
+
+            if (g != null)
+                g.Play();
         }
         else if (kick != null && kick.activeSelf)
         {
             var g = kick.GetComponent<SpriteGlowFade>();
-            if (g != null) g.Play();
+
+            if (g != null)
+                g.Play();
+        }
+        else if (block != null && block.activeSelf)
+        {
+            var g = block.GetComponent<SpriteGlowFade>();
+
+            if (g != null)
+                g.Play();
         }
     }
+
+    // =========================================================
+    // ENSURE HIT GLOW
+    // =========================================================
 
     private void EnsureHitGlow()
     {
         hitGlow = GetComponent<SpriteGlowFade>();
-        if (hitGlow == null)
-        {
-            hitGlow = gameObject.AddComponent<SpriteGlowFade>();
-        }
 
-        if (glowMaterial != null && hitGlow.glowMaterial == null)
+        if (hitGlow == null)
+            hitGlow = gameObject.AddComponent<SpriteGlowFade>();
+
+        if (glowMaterial != null &&
+            hitGlow.glowMaterial == null)
         {
             hitGlow.glowMaterial = glowMaterial;
         }

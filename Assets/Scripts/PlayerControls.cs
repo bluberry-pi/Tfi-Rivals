@@ -34,8 +34,10 @@ public class PlayerControls : MonoBehaviour
     public float kickTime = 0.2f;
     public float kickCooldown = 0.12f;
 
-    private PlayerTransition playerTransition;
+    [Header("Block")]
+    public bool isBlockPressed = false;
 
+    private PlayerTransition playerTransition;
     public float horizontal;
 
     private Rigidbody2D rb;
@@ -44,6 +46,7 @@ public class PlayerControls : MonoBehaviour
     [SerializeField] private bool isGrounded;
     [SerializeField] private bool jumpPressed;
     [SerializeField] private bool jumpHeld;
+
     private float jumpTime;
 
     float tiltTimer;
@@ -54,25 +57,20 @@ public class PlayerControls : MonoBehaviour
         playerTransition = GetComponent<PlayerTransition>();
     }
 
-    // START
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+
         if (playerTransition == null)
             playerTransition = GetComponent<PlayerTransition>();
 
         transform.localRotation = Quaternion.identity;
     }
 
-    // UPDATE
-
     void Update()
     {
         RunningJuice();
     }
-
-    // FIXED UPDATE
 
     void FixedUpdate()
     {
@@ -90,7 +88,9 @@ public class PlayerControls : MonoBehaviour
         BetterGravity();
     }
 
-    // MOVEMENT
+    // =========================================================
+    // MOVEMENT INPUT
+    // =========================================================
 
     public void Move(InputAction.CallbackContext context)
     {
@@ -98,140 +98,57 @@ public class PlayerControls : MonoBehaviour
 
         if (horizontal > 0)
         {
-            // Face right
-            float scaleX = defaultFacingLeft ? -Mathf.Abs(transform.localScale.x) : Mathf.Abs(transform.localScale.x);
-            transform.localScale = new Vector3(scaleX, transform.localScale.y, transform.localScale.z);
+            float scaleX = defaultFacingLeft
+                ? -Mathf.Abs(transform.localScale.x)
+                : Mathf.Abs(transform.localScale.x);
+
+            transform.localScale = new Vector3(
+                scaleX,
+                transform.localScale.y,
+                transform.localScale.z
+            );
         }
         else if (horizontal < 0)
         {
-            // Face left
-            float scaleX = defaultFacingLeft ? Mathf.Abs(transform.localScale.x) : -Mathf.Abs(transform.localScale.x);
-            transform.localScale = new Vector3(scaleX, transform.localScale.y, transform.localScale.z);
+            float scaleX = defaultFacingLeft
+                ? Mathf.Abs(transform.localScale.x)
+                : -Mathf.Abs(transform.localScale.x);
+
+            transform.localScale = new Vector3(
+                scaleX,
+                transform.localScale.y,
+                transform.localScale.z
+            );
         }
     }
 
     public void Movement()
     {
+        // When block is on, the player cannot move
+        if (isBlockPressed || (playerTransition != null && playerTransition.IsBlocking))
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            return;
+        }
+
         rb.linearVelocity = new Vector2(
             horizontal * speed,
             rb.linearVelocity.y
         );
     }
 
+    // =========================================================
+    // PUNCH
+    // =========================================================
+
     public void Punch()
     {
+        if (isBlockPressed || (playerTransition != null && playerTransition.IsBlocking))
+            return;
+
         if (playerTransition != null)
         {
             playerTransition.TriggerPunch();
-        }
-    }
-
-    public void Kick()
-    {
-        if (playerTransition != null)
-        {
-            playerTransition.TriggerKick();
-        }
-    }
-
-    // RUNNING TILT
-
-    void RunningJuice()
-    {
-        // MASTER TOGGLE
-        if (!enableRunningTilt)
-        {
-            tiltTimer = 0f;
-            tiltRight = false;
-
-            // Make absolutely sure the character is upright
-            transform.localRotation = Quaternion.identity;
-
-            return;
-        }
-
-        // NOT MOVING
-
-        if (Mathf.Abs(horizontal) < 0.01f)
-        {
-            tiltTimer = 0f;
-            tiltRight = false;
-
-            if (smoothTilt)
-            {
-                transform.localRotation = Quaternion.Lerp(
-                    transform.localRotation,
-                    Quaternion.identity,
-                    tiltSmoothSpeed * Time.deltaTime
-                );
-            }
-            else
-            {
-                transform.localRotation = Quaternion.identity;
-            }
-
-            return;
-        }
-
-        // RUNNING
-
-        tiltTimer += Time.deltaTime;
-
-        float switchTime = 1f / runTiltSpeed;
-
-        if (tiltTimer >= switchTime)
-        {
-            tiltTimer = 0f;
-            tiltRight = !tiltRight;
-        }
-
-        // Choose left or right tilt
-        float tilt = tiltRight
-            ? runTiltAmount
-            : -runTiltAmount;
-
-        // Reverse tilt when moving left
-        tilt *= Mathf.Sign(horizontal);
-
-        Quaternion targetRotation = Quaternion.Euler(
-            0f,
-            0f,
-            tilt
-        );
-
-        // SMOOTH / INSTANT
-
-        if (smoothTilt)
-        {
-            transform.localRotation = Quaternion.Lerp(
-                transform.localRotation,
-                targetRotation,
-                tiltSmoothSpeed * Time.deltaTime
-            );
-        }
-        else
-        {
-            // Instant snap
-            transform.localRotation = targetRotation;
-        }
-    }
-
-    // JUMP INPUT
-
-    public void Jump(InputAction.CallbackContext context)
-    {
-        if (context.started)
-        {
-            if (isGrounded)
-            {
-                jumpPressed = true;
-                jumpHeld = true;
-            }
-        }
-
-        if (context.canceled)
-        {
-            jumpHeld = false;
         }
     }
 
@@ -239,6 +156,9 @@ public class PlayerControls : MonoBehaviour
     {
         if (context.started)
         {
+            if (isBlockPressed || (playerTransition != null && playerTransition.IsBlocking))
+                return;
+
             if (playerTransition != null)
             {
                 playerTransition.OnPunchPressed();
@@ -261,10 +181,28 @@ public class PlayerControls : MonoBehaviour
         }
     }
 
+    // =========================================================
+    // KICK
+    // =========================================================
+
+    public void Kick()
+    {
+        if (isBlockPressed || (playerTransition != null && playerTransition.IsBlocking))
+            return;
+
+        if (playerTransition != null)
+        {
+            playerTransition.TriggerKick();
+        }
+    }
+
     public void Kick(InputAction.CallbackContext context)
     {
         if (context.started)
         {
+            if (isBlockPressed || (playerTransition != null && playerTransition.IsBlocking))
+                return;
+
             if (playerTransition != null)
             {
                 playerTransition.OnKickPressed();
@@ -287,7 +225,137 @@ public class PlayerControls : MonoBehaviour
         }
     }
 
+    // =========================================================
+    // BLOCK
+    // =========================================================
+
+    public void Block(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            isBlockPressed = true;
+            if (playerTransition != null)
+            {
+                playerTransition.OnBlockPressed();
+            }
+        }
+        else if (context.canceled)
+        {
+            isBlockPressed = false;
+            if (playerTransition != null)
+            {
+                playerTransition.OnBlockReleased();
+            }
+        }
+    }
+
+    // =========================================================
+    // RUNNING TILT
+    // =========================================================
+
+    void RunningJuice()
+    {
+        if (isBlockPressed || (playerTransition != null && playerTransition.IsBlocking))
+        {
+            tiltTimer = 0f;
+            tiltRight = false;
+            transform.localRotation = Quaternion.identity;
+            return;
+        }
+
+        if (!enableRunningTilt)
+        {
+            tiltTimer = 0f;
+            tiltRight = false;
+
+            transform.localRotation = Quaternion.identity;
+            return;
+        }
+
+        if (Mathf.Abs(horizontal) < 0.01f)
+        {
+            tiltTimer = 0f;
+            tiltRight = false;
+
+            if (smoothTilt)
+            {
+                transform.localRotation = Quaternion.Lerp(
+                    transform.localRotation,
+                    Quaternion.identity,
+                    tiltSmoothSpeed * Time.deltaTime
+                );
+            }
+            else
+            {
+                transform.localRotation = Quaternion.identity;
+            }
+
+            return;
+        }
+
+        tiltTimer += Time.deltaTime;
+
+        float switchTime = 1f / runTiltSpeed;
+
+        if (tiltTimer >= switchTime)
+        {
+            tiltTimer = 0f;
+            tiltRight = !tiltRight;
+        }
+
+        float tilt = tiltRight
+            ? runTiltAmount
+            : -runTiltAmount;
+
+        tilt *= Mathf.Sign(horizontal);
+
+        Quaternion targetRotation = Quaternion.Euler(
+            0f,
+            0f,
+            tilt
+        );
+
+        if (smoothTilt)
+        {
+            transform.localRotation = Quaternion.Lerp(
+                transform.localRotation,
+                targetRotation,
+                tiltSmoothSpeed * Time.deltaTime
+            );
+        }
+        else
+        {
+            transform.localRotation = targetRotation;
+        }
+    }
+
+    // =========================================================
+    // JUMP INPUT
+    // =========================================================
+
+    public void Jump(InputAction.CallbackContext context)
+    {
+        if (isBlockPressed || (playerTransition != null && playerTransition.IsBlocking))
+            return;
+
+        if (context.started)
+        {
+            if (isGrounded)
+            {
+                jumpPressed = true;
+                jumpHeld = true;
+            }
+        }
+
+        if (context.canceled)
+        {
+            jumpHeld = false;
+        }
+    }
+
+    // =========================================================
     // JUMP
+    // =========================================================
 
     public void Jump()
     {
@@ -300,7 +368,9 @@ public class PlayerControls : MonoBehaviour
         groundTriggerCount = 0;
     }
 
+    // =========================================================
     // VARIABLE JUMP
+    // =========================================================
 
     public void VariableJump()
     {
@@ -309,12 +379,13 @@ public class PlayerControls : MonoBehaviour
             jumpTime < maxJumpTime)
         {
             rb.AddForce(Vector2.up * jumpHoldForce);
-
             jumpTime += Time.fixedDeltaTime;
         }
     }
 
+    // =========================================================
     // BETTER GRAVITY
+    // =========================================================
 
     public void BetterGravity()
     {
@@ -332,7 +403,9 @@ public class PlayerControls : MonoBehaviour
         }
     }
 
-    // GROUND CHECK (TRIGGER)
+    // =========================================================
+    // GROUND CHECK
+    // =========================================================
 
     private int groundTriggerCount = 0;
 
@@ -341,6 +414,7 @@ public class PlayerControls : MonoBehaviour
         if (other.CompareTag("Ground"))
         {
             groundTriggerCount++;
+
             isGrounded = true;
             rb.gravityScale = 1f;
         }
@@ -348,7 +422,8 @@ public class PlayerControls : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
-        if (other.CompareTag("Ground") && rb.linearVelocity.y <= 0.1f)
+        if (other.CompareTag("Ground") &&
+            rb.linearVelocity.y <= 0.1f)
         {
             isGrounded = true;
         }
@@ -358,7 +433,11 @@ public class PlayerControls : MonoBehaviour
     {
         if (other.CompareTag("Ground"))
         {
-            groundTriggerCount = Mathf.Max(0, groundTriggerCount - 1);
+            groundTriggerCount = Mathf.Max(
+                0,
+                groundTriggerCount - 1
+            );
+
             if (groundTriggerCount == 0)
             {
                 isGrounded = false;

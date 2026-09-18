@@ -77,8 +77,22 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeHit()
     {
-        // 1. Play hit glow on the character who received the hit
+        // If blocking, this GameObject takes no damage
         PlayerTransition transition = GetComponent<PlayerTransition>();
+        if (transition != null && transition.IsBlocking)
+        {
+            Debug.Log(gameObject.name + " blocked the hit!");
+            return;
+        }
+
+        PlayerControls controls = GetComponent<PlayerControls>();
+        if (controls != null && controls.isBlockPressed)
+        {
+            Debug.Log(gameObject.name + " blocked the hit!");
+            return;
+        }
+
+        // 1. Play hit glow on the character who received the hit
         if (transition != null)
         {
             transition.PlayHitGlow();
