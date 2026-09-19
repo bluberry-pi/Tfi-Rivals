@@ -12,6 +12,9 @@ public class AttackHitbox : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (GameOverManager.instance != null && GameOverManager.instance.IsGameOver)
+            return;
+
         if (alreadyHit)
             return;
 

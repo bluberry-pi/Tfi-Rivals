@@ -637,8 +637,11 @@ MonoBehaviour:
   gameOverCanvas: {fileID: 789250891}
   mbWinText: {fileID: 715474172}
   pkWinText: {fileID: 1782255079}
+  restartText: {fileID: 0}
   mbHealth: {fileID: 1920386663}
   pkHealth: {fileID: 843826488}
+  mbCLIP: {fileID: 8300000, guid: 32da105a0367a9643bdb2e2a7280b84b, type: 3}
+  pkCLIP: {fileID: 8300000, guid: ff146d077b0a05f41accbd3a5540ee0a, type: 3}
 --- !u!4 &423867178
 Transform:
   m_ObjectHideFlags: 0
@@ -2104,7 +2107,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: b7a55bce61ceaf343a0b8a50735a870d, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.2
+  m_Volume: 0.6
   m_Pitch: 1
   Loop: 1
   Mute: 0

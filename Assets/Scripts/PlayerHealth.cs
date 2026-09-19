@@ -131,5 +131,10 @@ public class PlayerHealth : MonoBehaviour
             " lost a heart! Hearts remaining: " +
             currentHearts
         );
+
+        if (currentHearts <= 0 && GameOverManager.instance != null)
+        {
+            GameOverManager.instance.OnPlayerDefeated(gameObject.name);
+        }
     }
 }
