@@ -90,14 +90,20 @@ public class GameOverManager : MonoBehaviour
     public void MBWins()
     {
         if (isGameOver) return;
-        SoundFXManager.instance.PlaySoundFXClip(mbCLIP, transform, 1f);
+        if (mbCLIP != null && SoundFXManager.instance != null)
+        {
+            SoundFXManager.instance.PlaySoundFXClip(mbCLIP, transform, 1f);
+        }
         TriggerGameOver(mbWinText);
     }
 
     public void PKWins()
     {
         if (isGameOver) return;
-        SoundFXManager.instance.PlaySoundFXClip(pkCLIP, transform, 1f);
+        if (pkCLIP != null && SoundFXManager.instance != null)
+        {
+            SoundFXManager.instance.PlaySoundFXClip(pkCLIP, transform, 1f);
+        }
         TriggerGameOver(pkWinText);
     }
 

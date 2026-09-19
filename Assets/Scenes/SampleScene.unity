@@ -223,6 +223,10 @@ PrefabInstance:
       value: Mahesh
       objectReference: {fileID: 0}
     - target: {fileID: 1072083974124492262, guid: 5786da8fa79f2ab448ea2468fde42626, type: 3}
+      propertyPath: hitsPerHeart
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072083974124492262, guid: 5786da8fa79f2ab448ea2468fde42626, type: 3}
       propertyPath: 'hearts.Array.data[0]'
       value: 
       objectReference: {fileID: 742593910}
@@ -712,6 +716,10 @@ PrefabInstance:
     - target: {fileID: 1069718840252338492, guid: e20c48b901418dd4d9b81773dfa85e0e, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.2326
+      objectReference: {fileID: 0}
+    - target: {fileID: 2931450686808576788, guid: e20c48b901418dd4d9b81773dfa85e0e, type: 3}
+      propertyPath: hitsPerHeart
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2931450686808576788, guid: e20c48b901418dd4d9b81773dfa85e0e, type: 3}
       propertyPath: 'hearts.Array.data[0]'
