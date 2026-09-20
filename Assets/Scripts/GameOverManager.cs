@@ -102,7 +102,7 @@ public class GameOverManager : MonoBehaviour
         if (isGameOver) return;
         if (pkCLIP != null && SoundFXManager.instance != null)
         {
-            SoundFXManager.instance.PlaySoundFXClip(pkCLIP, transform, 1f);
+            SoundFXManager.instance.PlaySoundFXClip(pkCLIP, transform, 0.25f);
         }
         TriggerGameOver(pkWinText);
     }

@@ -246,6 +246,10 @@ PrefabInstance:
       propertyPath: 'hearts.Array.data[4]'
       value: 
       objectReference: {fileID: 129083566}
+    - target: {fileID: 3742237469180805186, guid: 5786da8fa79f2ab448ea2468fde42626, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 4630888306293164537, guid: 5786da8fa79f2ab448ea2468fde42626, type: 3}
       propertyPath: block
       value: 
@@ -341,6 +345,14 @@ PrefabInstance:
     - target: {fileID: 6223554291514990163, guid: 5786da8fa79f2ab448ea2468fde42626, type: 3}
       propertyPath: m_ActionEvents.Array.data[4].m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 7041072375740526307, guid: 5786da8fa79f2ab448ea2468fde42626, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8477190028738563179, guid: 5786da8fa79f2ab448ea2468fde42626, type: 3}
+      propertyPath: jumpForce
+      value: 17
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -717,6 +729,14 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: -0.2326
       objectReference: {fileID: 0}
+    - target: {fileID: 1617715132046082934, guid: e20c48b901418dd4d9b81773dfa85e0e, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2707969904871686994, guid: e20c48b901418dd4d9b81773dfa85e0e, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 2931450686808576788, guid: e20c48b901418dd4d9b81773dfa85e0e, type: 3}
       propertyPath: hitsPerHeart
       value: 3
@@ -797,6 +817,10 @@ PrefabInstance:
       propertyPath: block
       value: 
       objectReference: {fileID: 1443908298}
+    - target: {fileID: 9157195149588690571, guid: e20c48b901418dd4d9b81773dfa85e0e, type: 3}
+      propertyPath: jumpForce
+      value: 17
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
